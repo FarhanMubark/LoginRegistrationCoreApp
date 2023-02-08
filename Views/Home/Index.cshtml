@@ -1,0 +1,184 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+    Layout = null;
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css"
+    integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"
+    integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+    crossorigin="anonymous"></script>
+
+<div class="row" style="margin-top: 5em;">
+    <div class="col-md-4 col-md-offset-4 alert alert-info">
+        <h3 class="text-center">Login</h3>
+        <form id="loginForm">
+            <div id="msg">
+                <ul style="color:red;"> Invalid Username Or Password</ul>
+            </div>
+            <div class="form-group">
+                <div class="input-group">
+                    <span class="input-group-addon"><i class="glyphicon glyphicon-envelope"></i></span>
+                    <input class="form-control" type="email" name="Email" id="logEmail" placeholder="Email" />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="input-group">
+                    <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
+                    <input class="form-control" type="password" name="Password" id="logPssword"
+                        placeholder="Password" />
+                </div>
+            </div>
+        </form>
+        <div class="form-group">
+            <button class="btn btn-info form-control" type="submit" onclick="Login()"><i
+                    class="glyphicon glyphicon-log-in"></i> Login</button>
+        </div>
+        <div class="form-group">
+            <a style="float:left">Forget Password ? </a><a style="float:right;cursor:pointer" onclick="SignUp()"> Sign
+                Up</a>
+        </div>
+    </div>
+</div>
+
+
+
+
+<div class="modal fade" id="ShowModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <a href="#" class="close" data-dismiss="modal">&times;</a>
+                <h4>Registration Form</h4>
+                <div id="message1">
+                    <div class="alert alert-success">
+                        <span class="glyphicon glyphicon-ok"></span><strong>
+                            Success Message!<br />
+                            <p id="successmessage">send an email to your email address with confirmation link!</p>
+                        </strong>
+                    </div>
+                </div>
+                <div id="message2">
+                    <div class="alert alert-danger">
+                        <span class="glyphicon glyphicon-remove"></span><strong id="errormessage">Error Message! Your
+                            Registration Is Not Complete</strong>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body">
+                <form id="Registration">
+                    <div class="form-group">
+                        <div class="input-group">
+                            <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+                            <input class="form-control" type="text" name="Username" id="user" placeholder="Username" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="input-group">
+                            <span class="input-group-addon"><i class="glyphicon glyphicon-envelope"></i></span>
+                            <input class="form-control" type="email" name="Email" id="Email" placeholder="Email" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="input-group">
+                            <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
+                            <input class="form-control" type="password" name="Password" id="Password"
+                                placeholder="Password" />
+                        </div>
+                    </div>
+                </form>
+                <div class="form-group">
+                    <button class="btn btn-info form-control" type="submit" onclick="SaveForm()"><i
+                            class="glyphicon glyphicon-registration-mark"></i> Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function SignUp() {
+        $("#ShowModal").modal();
+        $("#message1").hide();
+        $("#message2").hide();
+    }
+
+    function SaveForm() {
+        debugger
+        var name = $("#user").val();
+        var pwd = $("#Password").val();
+        var email = $("#Email").val();
+
+        if (name == "" || pwd == "" || email == "") {
+            $("#message1").hide();
+            $("#message2").show();
+            return false;
+        }
+
+        var obj = {
+            Username: $("#user").val(),
+            Email: $('#Email').val(),
+            Password: $('#Password').val()
+        }
+
+
+
+        $.ajax({
+            type: 'POST',
+            dataType: 'json',
+            url: "/api/Register/RegisterNewUser",
+            data: JSON.stringify(obj),
+            contentType: 'application/json; charset=utf-8',
+            success: function (result) {
+                console.log(result);
+                //alert(result.statusMessage);
+                if (result.statusCode === 200) {
+                    $('#successmessage').html(result.statusMessage);
+                    $("#message1").show();
+                    $("#message2").hide();
+                    $("#Registration")[0].reset();
+                }
+                else {
+                    $('#errormessage').html(result.statusMessage);
+                    $("#message1").hide();
+                    $("#message2").show();
+                }
+            },
+            error: function (result) {
+                console.log(result);
+            }
+
+        });
+    }
+
+    //Login System
+    $("#msg").hide();
+
+    function Login() {
+        var obj = {
+            Email: $('#logEmail').val(),
+            Password: $('#logPssword').val()
+        }
+
+        $.ajax({
+            type: 'POST',
+            dataType: 'json',
+            url: "/api/Register/Login",
+            data: JSON.stringify(obj),
+            contentType: 'application/json; charset=utf-8',
+            success: function (result) {
+                if (result.statusCode === 200) {
+                    window.location.href = "/Home/Dashboard";
+                }
+                else {
+                    @* alert('Wrong Email or Password'); *@
+                        $('#msg').html(result.statusMessage);
+                    $("#msg").show();
+                }
+            }
+        })
+    }
+</script>
